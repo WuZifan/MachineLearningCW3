@@ -37,14 +37,14 @@ O = 60
 # When using RELUs, make sure biases are initialised with small *positive* values for example 0.1 = tf.ones([K])/10
 W1 = tf.Variable(tf.truncated_normal([900, L], stddev=0.2))  # 784 = 28 * 28
 B1 = tf.Variable(tf.zeros([L])+0.1)
-W2 = tf.Variable(tf.truncated_normal([L, M], stddev=0.2))
-B2 = tf.Variable(tf.zeros([M])+0.1)
-W3 = tf.Variable(tf.truncated_normal([M, N], stddev=0.2))
-B3 = tf.Variable(tf.zeros([N])+0.1)
+# W2 = tf.Variable(tf.truncated_normal([L, M], stddev=0.2))
+# B2 = tf.Variable(tf.zeros([M])+0.1)
+# W3 = tf.Variable(tf.truncated_normal([M, N], stddev=0.2))
+# B3 = tf.Variable(tf.zeros([N])+0.1)
 # W4 = tf.Variable(tf.truncated_normal([N, O], stddev=0.1))
 # B4 = tf.Variable(tf.zeros([O]))
 # W5 = tf.Variable(tf.truncated_normal([O, 7], stddev=0.1))
-W5 = tf.Variable(tf.truncated_normal([N, 7], stddev=0.2))
+W5 = tf.Variable(tf.truncated_normal([L, 7], stddev=0.2))
 B5 = tf.Variable(tf.zeros([7])+0.1)
 
 # The model
@@ -54,11 +54,11 @@ XX = tf.reshape(X, [-1, 900])
 # Y3 = tf.nn.sigmoid(tf.matmul(Y2, W3) + B3)
 # Y4 = tf.nn.sigmoid(tf.matmul(Y3, W4) + B4)
 Y1 = tf.sigmoid(tf.matmul(XX, W1) + B1)
-Y2 = tf.sigmoid(tf.matmul(Y1, W2) + B2)
-Y3 = tf.sigmoid(tf.matmul(Y2, W3) + B3)
+# Y2 = tf.sigmoid(tf.matmul(Y1, W2) + B2)
+# Y3 = tf.sigmoid(tf.matmul(Y2, W3) + B3)
 # Ylogits = tf.matmul(Y4, W5) + B5
 # Ylogits = tf.nn.sigmoid(tf.matmul(Y4, W5) + B5)
-Ylogits = tf.nn.softmax(tf.matmul(Y3, W5) + B5)
+Ylogits = tf.nn.softmax(tf.matmul(Y1, W5) + B5)
 
 # cross-entropy loss function (= -sum(Y_i * log(Yi)) ), normalised for batches of 100  images
 # TensorFlow provides the softmax_cross_entropy_with_logits function to avoid numerical stability
@@ -72,7 +72,7 @@ correct_prediction = tf.equal(tf.argmax(Y, 1), tf.argmax(Y_, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 # training step, learning rate = 0.003; 0.05 is useless
-learning_rate = 0.009
+learning_rate = 0.01
 train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cross_entropy)
 
 # init
@@ -84,7 +84,7 @@ def select_data(train_data,train_target,i):
     o_data=[]
     o_target=[]
     for ind in range(len(train_data)):
-        if ind ==i:
+        if ind % 10 ==i:
             o_data.append(train_data[ind])
             o_target.append(train_target[ind])
 
@@ -92,10 +92,14 @@ def select_data(train_data,train_target,i):
     o_target=np.array(o_target)
     return o_data,o_target
 
+index_test=0
 while True:
-    # [train_d,train_t]=select_data(train_data,train_target,i)
+    index_test+=1
+    [train_d,train_t]=select_data(train_data,train_target,index_test % 10)
     sess.run(train_step, {X: train_data, Y_: train_target})
-    print "cross_entropy: "+str(sess.run(cross_entropy, {X: train_data, Y_: train_target}))
+    print len(train_d)
+    print len(train_d[0])
+    print "cross_entropy: "+str(sess.run(cross_entropy, {X: train_d, Y_: train_t}))
     print "accuracy: "+str(sess.run(accuracy, {X: train_data, Y_: train_target}))
 
 #
