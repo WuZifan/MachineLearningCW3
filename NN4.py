@@ -37,14 +37,14 @@ O = 60
 # When using RELUs, make sure biases are initialised with small *positive* values for example 0.1 = tf.ones([K])/10
 W1 = tf.Variable(tf.truncated_normal([900, L], stddev=0.2))  # 784 = 28 * 28
 B1 = tf.Variable(tf.zeros([L])+0.1)
-# W2 = tf.Variable(tf.truncated_normal([L, M], stddev=0.2))
-# B2 = tf.Variable(tf.zeros([M])+0.1)
+W2 = tf.Variable(tf.truncated_normal([L, M], stddev=0.2))
+B2 = tf.Variable(tf.zeros([M])+0.1)
 # W3 = tf.Variable(tf.truncated_normal([M, N], stddev=0.2))
 # B3 = tf.Variable(tf.zeros([N])+0.1)
 # W4 = tf.Variable(tf.truncated_normal([N, O], stddev=0.1))
 # B4 = tf.Variable(tf.zeros([O]))
 # W5 = tf.Variable(tf.truncated_normal([O, 7], stddev=0.1))
-W5 = tf.Variable(tf.truncated_normal([L, 7], stddev=0.2))
+W5 = tf.Variable(tf.truncated_normal([M, 7], stddev=0.2))
 B5 = tf.Variable(tf.zeros([7])+0.1)
 
 # The model
@@ -55,11 +55,11 @@ XX=X
 # Y3 = tf.nn.sigmoid(tf.matmul(Y2, W3) + B3)
 # Y4 = tf.nn.sigmoid(tf.matmul(Y3, W4) + B4)
 Y1 = tf.sigmoid(tf.matmul(XX, W1) + B1)
-# Y2 = tf.sigmoid(tf.matmul(Y1, W2) + B2)
+Y2 = tf.sigmoid(tf.matmul(Y1, W2) + B2)
 # Y3 = tf.sigmoid(tf.matmul(Y2, W3) + B3)
 # Ylogits = tf.matmul(Y4, W5) + B5
 # Ylogits = tf.nn.sigmoid(tf.matmul(Y4, W5) + B5)
-Ylogits = tf.sigmoid(tf.matmul(Y1, W5) + B5)
+Ylogits = tf.sigmoid(tf.matmul(Y2, W5) + B5)
 
 # cross-entropy loss function (= -sum(Y_i * log(Yi)) ), normalised for batches of 100  images
 # TensorFlow provides the softmax_cross_entropy_with_logits function to avoid numerical stability
