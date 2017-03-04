@@ -11,7 +11,8 @@ print("Download Done!")
 # 这里的784 表示一个图像有784个像素点。
 # 对应到面部表情中，该值应该是45，表示有45个属性
 # x = tf.placeholder(tf.float32, [None, 784]) # 表示整个数据集
-x = tf.placeholder(tf.float32, [None, 45])  # 表示整个数据集
+# 指定等待输入的变量，x是一个占位符，第一个参数表示数据的类型，第二个参数表示数据的结构
+x = tf.placeholder(tf.float32, [None, 45]) # 表示整个数据集
 
 # paras
 # 这个W相当于label的集合
@@ -22,7 +23,7 @@ W = tf.Variable(tf.zeros([45, 6]))
 # 这个b中的10表示，一个图像，对应的结果是0~9中的一个，因为只有10个，因此就是10
 # 所以对应到面部表情中，该值应该是6
 # b = tf.Variable(tf.zeros([10]))#这个表示偏置值
-b = tf.Variable(tf.zeros([6]))  # 这个表示偏置值
+b = tf.Variable(tf.zeros([6]))#这个表示偏置值
 
 # 计算那个ｓｏｆｔｍａｘ的值
 y = tf.nn.softmax(tf.matmul(x, W) + b)
@@ -76,12 +77,18 @@ for i in range(9):
     # print batch_ys
     # print batch_xs
     sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
+    a = sess.run(y, feed_dict={x: batch_xs, y_: batch_ys})
+    print a
+    print len(a)
+    print len(a[0])
 
+test_data,test_label=load_data(9)
 # y_中存储了所有图片的正确结果，ｙ是所有的训练的结果结果
 correct_prediction = tf.equal(tf.arg_max(y, 1), tf.arg_max(y_, 1))
+print "correct_prediction: "+ str(sess.run(correct_prediction, feed_dict={x:test_data, y_: test_label}))
 # 计算正确率
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
-print
+print "accuracy: "+ str(sess.run(accuracy, feed_dict={x:test_data, y_: test_label}))
 # 输出
-test_data, test_label = load_data(9)
-print("Accuarcy on Test-dataset: ", sess.run(accuracy, feed_dict={x: test_data, y_: test_label}))
+test_data,test_label=load_data(9)
+print("Accuarcy on Test-dataset: ", sess.run(accuracy, feed_dict={x:test_data, y_: test_label}))
