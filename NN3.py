@@ -114,13 +114,13 @@ def update_learning_data3(learning_rate,i):
         return learning_rate
 
 index_test=0
-init_learning_rate=0.1
+init_learning_rate=0.01
 # while True:
 print init_learning_rate # 第一次是0.01.第二次是0.05.第三次是0.001,第四次是0.1
 for i in range(800):
     # index_test+=1
     # [train_d,train_t]=select_data(train_data,train_target,index_test % 5)
-    sess.run(train_step, {X: train_data, Y_: train_target})
+    sess.run(train_step, {X: train_data, Y_: train_target,learning_rate:init_learning_rate})
     # transfor=tf.to_float(0.01)
     # l_rate=sess.run(transfor)
     # For SGD
