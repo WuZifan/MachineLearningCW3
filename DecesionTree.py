@@ -11,8 +11,7 @@ print("Download Done!")
 # 这里的784 表示一个图像有784个像素点。
 # 对应到面部表情中，该值应该是45，表示有45个属性
 # x = tf.placeholder(tf.float32, [None, 784]) # 表示整个数据集
-x = tf.placeholder(tf.float32, [None, 45]) # 表示整个数据集
-
+x = tf.placeholder(tf.float32, [None, 45])  # 表示整个数据集
 
 # paras
 # 这个W相当于label的集合
@@ -23,7 +22,7 @@ W = tf.Variable(tf.zeros([45, 6]))
 # 这个b中的10表示，一个图像，对应的结果是0~9中的一个，因为只有10个，因此就是10
 # 所以对应到面部表情中，该值应该是6
 # b = tf.Variable(tf.zeros([10]))#这个表示偏置值
-b = tf.Variable(tf.zeros([6]))#这个表示偏置值
+b = tf.Variable(tf.zeros([6]))  # 这个表示偏置值
 
 # 计算那个ｓｏｆｔｍａｘ的值
 y = tf.nn.softmax(tf.matmul(x, W) + b)
@@ -43,6 +42,7 @@ init = tf.initialize_all_variables()
 sess = tf.Session()
 sess.run(init)
 
+
 def load_data(i):
     # 加载数据
     clean_data = sio.loadmat("DecisionTreeData/noisydata_students.mat")
@@ -51,21 +51,22 @@ def load_data(i):
     # print len(tdata)
     # print len(ldata)
     # 处理label
-    label_result=[]
-    tdata_result=[]
-    for ind,label_data in enumerate(ldata):
-        if ind % 10 ==i:
-            real_label=label_data[0]
-            temp_label=[0 for i in range(6)]
-            temp_label[real_label-1]=1
+    label_result = []
+    tdata_result = []
+    for ind, label_data in enumerate(ldata):
+        if ind % 10 == i:
+            real_label = label_data[0]
+            temp_label = [0 for i in range(6)]
+            temp_label[real_label - 1] = 1
             label_result.append(temp_label)
 
             tdata_result.append(tdata[ind])
 
-    ny_tdata=ny.array(tdata_result)
-    ny_label=ny.array(label_result)
+    ny_tdata = ny.array(tdata_result)
+    ny_label = ny.array(label_result)
 
-    return ny_tdata,ny_label
+    return ny_tdata, ny_label
+
 
 # train
 # for i in range(1000):
@@ -82,6 +83,5 @@ correct_prediction = tf.equal(tf.arg_max(y, 1), tf.arg_max(y_, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 print
 # 输出
-test_data,test_label=load_data(9)
-print("Accuarcy on Test-dataset: ", sess.run(accuracy, feed_dict={x:test_data, y_: test_label}))
-
+test_data, test_label = load_data(9)
+print("Accuarcy on Test-dataset: ", sess.run(accuracy, feed_dict={x: test_data, y_: test_label}))
