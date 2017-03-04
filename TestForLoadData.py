@@ -1,75 +1,89 @@
 # encoding=utf-8
-import tensorflow as tf
-import numpy as np
 
-# 添加层
-def add_layer(inputs, in_size, out_size, activation_function=None):
-    # add one more layer and return the output of this layer
-    Weights = tf.Variable(tf.random_normal([in_size, out_size]))
-    biases = tf.Variable(tf.zeros([1, out_size]) + 0.1)
-    Wx_plus_b = tf.matmul(inputs, Weights) + biases
-    if activation_function is None:
-        outputs = Wx_plus_b
+import matplotlib.pyplot as plt
+
+f=open("resultLevel2")
+line = f.readline()
+count=0
+cross_entropy=[]
+accuracy=[]
+while line:
+    if count % 2==0:
+        cross_entropy.append(line[15:])
+        print line[15:]
     else:
-        outputs = activation_function(Wx_plus_b)
-    return outputs
+        accuracy.append(line[10:])
+        print line[10:]
+    count+=1
+    line = f.readline()
 
-# 1.训练的数据
-# Make up some real data
-x_data = np.linspace(-1,1,300)[:, np.newaxis]
-noise = np.random.normal(0, 0.05, x_data.shape)
-y_data = np.square(x_data) - 0.5 + noise
+i=range(len(cross_entropy))
+plt.plot(i,cross_entropy,"ro")
+# plt.axis([175,190])
+plt.show()
 
-# 2.定义节点准备接收数据
-# define placeholder for inputs to network
-xs = tf.placeholder(tf.float32, [None, 1])
-ys = tf.placeholder(tf.float32, [None, 1])
-
-# 3.定义神经层：隐藏层和预测层
-# add hidden layer 输入值是 xs，在隐藏层有 10 个神经元
-l1 = add_layer(xs, 1, 10, activation_function=tf.nn.relu)
-# add output layer 输入值是隐藏层 l1，在预测层输出 1 个结果
-prediction = add_layer(l1, 10, 1, activation_function=None)
-
-# 4.定义 loss 表达式
-# the error between prediciton and real data
-loss = tf.reduce_mean(tf.reduce_sum(tf.square(ys - prediction),
-                     reduction_indices=[1]))
-
-# 5.选择 optimizer 使 loss 达到最小
-# 这一行定义了用什么方式去减少 loss，学习率是 0.1
-train_step = tf.train.GradientDescentOptimizer(0.1).minimize(loss)
-
-
-# important step 对所有变量进行初始化
-init = tf.initialize_all_variables()
-sess = tf.Session()
-# 上面定义的都没有运算，直到 sess.run 才会开始运算
-sess.run(init)
-
-# 迭代 1000 次学习，sess.run optimizer
-for i in range(1000):
-    # training train_step 和 loss 都是由 placeholder 定义的运算，所以这里要用 feed 传入参数
-    sess.run(train_step, feed_dict={xs: x_data, ys: y_data})
-    a=sess.run(prediction, feed_dict={xs: x_data, ys: y_data})
-    print len(a)
-    print len(a[0])
-    print a
-    if i % 50 == 0:
-        # to see the step improvement
-        print(sess.run(loss, feed_dict={xs: x_data, ys: y_data}))
-
-
-# 加载数据
-try_data=sio.loadmat("NN/data4students.mat")
-
-input_data=try_data['datasetInputs']
-target_data=try_data['datasetTargets']
-
-train_data=input_data[0][0]
-test_data=input_data[0][1]
-valid_data=input_data[0][2]
-
-train_target= target_data[0][0]
-test_target= target_data[0][1]
-valid_target= target_data[0][2]
+f.close
+'''
+0cross_entropy: 187.766
+0accuracy: 0.247054
+1cross_entropy: 186.261
+1accuracy: 0.251553
+2cross_entropy: 185.508
+2accuracy: 0.251871
+3cross_entropy: 185.136
+3accuracy: 0.251911
+4cross_entropy: 185.021
+4accuracy: 0.251911
+5cross_entropy: 184.76
+5accuracy: 0.251951
+6cross_entropy: 184.585
+6accuracy: 0.25199
+7cross_entropy: 184.433
+7accuracy: 0.25203
+8cross_entropy: 184.311
+8accuracy: 0.251951
+9cross_entropy: 184.233
+9accuracy: 0.25199
+10cross_entropy: 184.159
+10accuracy: 0.25203
+11cross_entropy: 184.04
+11accuracy: 0.25199
+12cross_entropy: 183.941
+12accuracy: 0.25199
+13cross_entropy: 183.853
+13accuracy: 0.25199
+14cross_entropy: 183.795
+14accuracy: 0.25207
+15cross_entropy: 183.743
+15accuracy: 0.25207
+16cross_entropy: 183.684
+16accuracy: 0.25203
+17cross_entropy: 183.654
+17accuracy: 0.25207
+18cross_entropy: 183.588
+18accuracy: 0.25207
+19cross_entropy: 183.555
+19accuracy: 0.25207
+20cross_entropy: 183.509
+20accuracy: 0.25199
+21cross_entropy: 183.424
+21accuracy: 0.25203
+22cross_entropy: 183.391
+22accuracy: 0.25199
+23cross_entropy: 183.332
+23accuracy: 0.25203
+24cross_entropy: 183.298
+24accuracy: 0.25199
+25cross_entropy: 183.264
+25accuracy: 0.25203
+26cross_entropy: 183.24
+26accuracy: 0.25199
+27cross_entropy: 183.201
+27accuracy: 0.25203
+28cross_entropy: 183.174
+28accuracy: 0.25199
+29cross_entropy: 183.145
+29accuracy: 0.25203
+30cross_entropy: 183.128
+30accuracy: 0.25199
+'''
