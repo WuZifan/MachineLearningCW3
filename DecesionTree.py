@@ -14,7 +14,6 @@ print("Download Done!")
 # 指定等待输入的变量，x是一个占位符，第一个参数表示数据的类型，第二个参数表示数据的结构
 x = tf.placeholder(tf.float32, [None, 45]) # 表示整个数据集
 
-
 # paras
 # 这个W相当于label的集合
 # 对于一个ｌａｂｅｌ，其需要一种ｗｅｉｇｈｔ，对于１０个，当然需要１０个ｗｅｉｇｈｔ
@@ -44,6 +43,7 @@ init = tf.initialize_all_variables()
 sess = tf.Session()
 sess.run(init)
 
+
 def load_data(i):
     # 加载数据
     clean_data = sio.loadmat("DecisionTreeData/noisydata_students.mat")
@@ -52,21 +52,22 @@ def load_data(i):
     # print len(tdata)
     # print len(ldata)
     # 处理label
-    label_result=[]
-    tdata_result=[]
-    for ind,label_data in enumerate(ldata):
-        if ind % 10 ==i:
-            real_label=label_data[0]
-            temp_label=[0 for i in range(6)]
-            temp_label[real_label-1]=1
+    label_result = []
+    tdata_result = []
+    for ind, label_data in enumerate(ldata):
+        if ind % 10 == i:
+            real_label = label_data[0]
+            temp_label = [0 for i in range(6)]
+            temp_label[real_label - 1] = 1
             label_result.append(temp_label)
 
             tdata_result.append(tdata[ind])
 
-    ny_tdata=ny.array(tdata_result)
-    ny_label=ny.array(label_result)
+    ny_tdata = ny.array(tdata_result)
+    ny_label = ny.array(label_result)
 
-    return ny_tdata,ny_label
+    return ny_tdata, ny_label
+
 
 # train
 # for i in range(1000):
@@ -89,6 +90,5 @@ print "correct_prediction: "+ str(sess.run(correct_prediction, feed_dict={x:test
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 print "accuracy: "+ str(sess.run(accuracy, feed_dict={x:test_data, y_: test_label}))
 # 输出
-
-print "Accuarcy on Test-dataset: ", sess.run(accuracy, feed_dict={x:test_data, y_: test_label})
-
+test_data,test_label=load_data(9)
+print("Accuarcy on Test-dataset: ", sess.run(accuracy, feed_dict={x:test_data, y_: test_label}))
