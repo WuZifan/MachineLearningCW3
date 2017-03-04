@@ -48,8 +48,7 @@ W5 = tf.Variable(tf.truncated_normal([L, 7], stddev=0.2))
 B5 = tf.Variable(tf.zeros([7])+0.1)
 
 # The model
-##  XX = tf.reshape(X, [-1, 900])
-XX=X
+XX = tf.reshape(X, [-1, 900])
 # Y1 = tf.nn.sigmoid(tf.matmul(XX, W1) + B1)
 # Y2 = tf.nn.sigmoid(tf.matmul(Y1, W2) + B2)
 # Y3 = tf.nn.sigmoid(tf.matmul(Y2, W3) + B3)
@@ -74,9 +73,10 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 # training step, learning rate = 0.003; 0.05 is useless
 learning_rate=tf.placeholder(tf.float32,shape=[])
-init_rate=0.01
-learning_rate=0.01
-train_step = tf.train.GradientDescentOptimizer(learning_rate=learning_rate).minimize(cross_entropy)
+# init_rate=0.01
+# learning_rate=0.01
+# train_step = tf.train.GradientDescentOptimizer(learning_rate=learning_rate).minimize(cross_entropy)
+train_step = tf.train.MomentumOptimizer(learning_rate,0.9 ).minimize(cross_entropy)
 
 # init
 init = tf.global_variables_initializer()
@@ -95,36 +95,43 @@ def select_data(train_data,train_target,i):
     o_target=np.array(o_target)
     return o_data,o_target
 
+def update_learning_data1(learning_rate,i):
+    if i % 50 ==0:
+        return learning_rate/2
+    else:
+        return learning_rate
+
+def update_learning_data2(learning_rate,i):
+    if i >= 50:
+        return learning_rate*0.99
+    else:
+        return learning_rate
+
+def update_learning_data3(learning_rate,i):
+    if i >= 50:
+        return learning_rate*50/i
+    else:
+        return learning_rate
+
 index_test=0
+init_learning_rate=0.1
 # while True:
-for i in range(888):
+for i in range(10000):
     # index_test+=1
     # [train_d,train_t]=select_data(train_data,train_target,index_test % 5)
-    sess.run(train_step, {X: train_data, Y_: train_target})
+    sess.run(train_step, {X: train_data, Y_: train_target,learning_rate:init_learning_rate})
     # transfor=tf.to_float(0.01)
     # l_rate=sess.run(transfor)
-    # print len(train_d)
-    # print len(train_d[0])
-    print "cross_entropy: "+str(sess.run(cross_entropy, {X: train_data, Y_: train_target}))
-    print "accuracy: "+str(sess.run(accuracy, {X: train_data, Y_: train_target}))
+    # For SGD
+    # print "cross_entropy: " + str(sess.run(cross_entropy, {X: [train_data[i % len(train_data)]], Y_: [train_target[i % len(train_data)]]}))
+    # print "cross_entropy: "+str(sess.run(cross_entropy, {X: [train_data[i % len(train_data)]], Y_: [train_target[i % len(train_data)]]}))
+    # print "accuracy: "+str(sess.run(accuracy, {X: [train_data[i % len(train_data)]], Y_: [train_target[i % len(train_data)]]}))
+    print "cross_entropy: " + str(
+        sess.run(cross_entropy, {X: train_data, Y_: train_target,learning_rate:init_learning_rate}))
+    print "accuracy: " + str(
+        sess.run(accuracy, {X: train_data, Y_: train_target,learning_rate:init_learning_rate}))
+    init_learning_rate=update_learning_data1(init_learning_rate,i)
 
-#
-# # You can call this function in a loop to train the model, 100 images at a time
-# def training_step(i, update_test_data, update_train_data):
-#
-#     # training on batches of 100 images with 100 labels
-#     batch_X, batch_Y = mnist.train.next_batch(100)
-#
-#     # compute training values for visualisation
-#     if update_train_data:
-#         a, c, im, w, b = sess.run([accuracy, cross_entropy, None,None,None], {X: batch_X, Y_: batch_Y})
-#         print(str(i) + ": accuracy:" + str(a) + " loss: " + str(c) + " (lr:" + str(learning_rate) + ")")
-#
-#     # compute test values for visualisation
-#     if update_test_data:
-#         a, c, im = sess.run([accuracy, cross_entropy, None], {X: mnist.test.images, Y_: mnist.test.labels})
-#         print(str(i) + ": ********* epoch " + str(i*100//mnist.train.images.shape[0]+1) + " ********* test accuracy:" + str(a) + " test loss: " + str(c))
-#
-#     # the backpropagation training step
-#     sess.run(train_step, {X: batch_X, Y_: batch_Y})
+
+
 
