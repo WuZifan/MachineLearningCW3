@@ -5,7 +5,7 @@
 import tensorflow as tf
 import numpy as np
 import scipy.io as sio
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 tf.set_random_seed(0)
 
@@ -97,37 +97,37 @@ def select_data(train_data,train_target,i):
     return o_data,o_target
 
 def update_learning_data1(learning_rate,i):
-    if i % 100 ==0:
+    if i % 500 ==0:
         return learning_rate/2
     else:
         return learning_rate
 
 def update_learning_data2(learning_rate,i):
-    if i >= 600:
+    if i >= 2000:
         return learning_rate*0.99
     else:
         return learning_rate
 
 def update_learning_data3(learning_rate,i):
-    if i >= 100:
-        return learning_rate*100/i
+    if i >= 2000:
+        return learning_rate*2000/i
     else:
         return learning_rate
 
 
-fig, ax = plt.subplots(1, 4)
-fig.canvas.set_window_title('Result Evaluation')
-pos = []
-train_cross_entropies = []
-train_accuracies = []
-valid_cross_entropies=[]
-valid_accuracies=[]
-plt.ion()
+# fig, ax = plt.subplots(1, 4)
+# fig.canvas.set_window_title('Result Evaluation')
+# pos = []
+# train_cross_entropies = []
+# train_accuracies = []
+# valid_cross_entropies=[]
+# valid_accuracies=[]
+# plt.ion()
 index_test=0
 init_learning_rate=0.01
 # while True:
 print init_learning_rate # 第一次是0.01.第二次是0.05.第三次是0.001,第四次是0.1
-for i in range(800):
+for i in range(2500):
     # index_test+=1
     # [train_d,train_t]=select_data(train_data,train_target,index_test % 5)
     sess.run(train_step, {X: train_data, Y_: train_target,learning_rate:init_learning_rate})
@@ -151,31 +151,31 @@ for i in range(800):
 
     init_learning_rate=update_learning_data2(init_learning_rate,i)
     # init_learning_rate=update_learning_data2(init_learning_rate,i)
-    pos = range(1, i + 2)
-    train_cross_entropies.append(float(train_cross_entropy))
-    train_accuracies.append(float(train_accuracy))
-    valid_cross_entropies.append(valid_cross_entropy)
-    valid_accuracies.append(valid_accuracy)
-
-    ax[0].plot(pos, train_cross_entropies)
-    ax[0].set_title("Error Function")
-    ax[0].grid(True)
-
-    ax[1].plot(pos, train_accuracies)
-    ax[1].set_title("Accuracy")
-    ax[1].grid(True)
-
-    ax[2].plot(pos, valid_cross_entropies)
-    ax[2].set_title("Valid cross entropies")
-    ax[2].grid(True)
-
-    ax[3].plot(pos, valid_accuracies)
-    ax[3].set_title("Valid Accuracy")
-    ax[3].grid(True)
-
-    plt.draw()
-
-plt.show()
+#     pos = range(1, i + 2)
+#     train_cross_entropies.append(float(train_cross_entropy))
+#     train_accuracies.append(float(train_accuracy))
+#     valid_cross_entropies.append(valid_cross_entropy)
+#     valid_accuracies.append(valid_accuracy)
+#
+#     ax[0].plot(pos, train_cross_entropies)
+#     ax[0].set_title("Error Function")
+#     ax[0].grid(True)
+#
+#     ax[1].plot(pos, train_accuracies)
+#     ax[1].set_title("Accuracy")
+#     ax[1].grid(True)
+#
+#     ax[2].plot(pos, valid_cross_entropies)
+#     ax[2].set_title("Valid cross entropies")
+#     ax[2].grid(True)
+#
+#     ax[3].plot(pos, valid_accuracies)
+#     ax[3].set_title("Valid Accuracy")
+#     ax[3].grid(True)
+#
+#     plt.draw()
+#
+# plt.show()
 
 
 
