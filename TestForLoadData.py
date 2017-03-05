@@ -2,25 +2,30 @@
 
 import matplotlib.pyplot as plt
 
-f=open("resultLevel2")
-line = f.readline()
-count=0
-cross_entropy=[]
-accuracy=[]
-while line:
-    if count % 2==0:
-        cross_entropy.append(line[15:])
-        print line[15:]
-    else:
-        accuracy.append(line[10:])
-        print line[10:]
-    count+=1
-    line = f.readline()
 
-i=range(len(cross_entropy))
-plt.plot(i,cross_entropy,"ro")
-# plt.axis([175,190])
-plt.show()
+for i in range(3):
+    f=open("resultLevel"+str(i+2))
+    line = f.readline()
+    count=0
+    cross_entropy=[]
+    accuracy=[]
+    while line:
+        if count % 2==0:
+            cross_entropy.append(line[15:])
+            print line[15:]
+        else:
+            accuracy.append(line[10:])
+            print line[10:]
+        count+=1
+        line = f.readline()
+
+    i=range(len(cross_entropy))
+    plt.subplot(211)
+    plt.plot(i,cross_entropy,"ro")
+    plt.subplot(212)
+    plt.plot(i,accuracy,"bo")
+    # plt.axis([175,190])
+    plt.show()
 
 f.close
 '''

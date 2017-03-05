@@ -5,11 +5,12 @@
 import tensorflow as tf
 import numpy as np
 import scipy.io as sio
+import matplotlib.pyplot as plt
 
 tf.set_random_seed(0)
 
 # 加载数据
-try_data=sio.loadmat("NN/data4students.mat")
+try_data=sio.loadmat("data4students.mat")
 
 input_data=try_data['datasetInputs']
 target_data=try_data['datasetTargets']
@@ -113,6 +114,15 @@ def update_learning_data3(learning_rate,i):
     else:
         return learning_rate
 
+
+fig, ax = plt.subplots(1, 4)
+fig.canvas.set_window_title('Result Evaluation')
+pos = []
+train_cross_entropies = []
+train_accuracies = []
+valid_cross_entropies=[]
+valid_accuracies=[]
+plt.ion()
 index_test=0
 init_learning_rate=0.01
 # while True:
@@ -127,17 +137,45 @@ for i in range(800):
     # print "cross_entropy: " + str(sess.run(cross_entropy, {X: [train_data[i % len(train_data)]], Y_: [train_target[i % len(train_data)]]}))
     # print "cross_entropy: "+str(sess.run(cross_entropy, {X: [train_data[i % len(train_data)]], Y_: [train_target[i % len(train_data)]]}))
     # print "accuracy: "+str(sess.run(accuracy, {X: [train_data[i % len(train_data)]], Y_: [train_target[i % len(train_data)]]}))
-    print str(i)+"cross_entropy: " + str(
-        sess.run(cross_entropy, {X: train_data, Y_: train_target,learning_rate:init_learning_rate}))
-    print str(i)+"accuracy: " + str(
-        sess.run(accuracy, {X: train_data, Y_: train_target,learning_rate:init_learning_rate}))
-    print str(i) + "validation_cross_entropy: " + str(
-        sess.run(cross_entropy, {X: valid_data, Y_: valid_target,learning_rate:init_learning_rate}))
-    print str(i) + "validation_accuracy: " + str(
-        sess.run(accuracy, {X: valid_data, Y_: valid_target,learning_rate:init_learning_rate}))
+    train_cross_entropy=sess.run(cross_entropy, {X: train_data, Y_: train_target,learning_rate:init_learning_rate})
+    print str(i)+"cross_entropy: " + str(train_cross_entropy)
+
+    train_accuracy=sess.run(accuracy, {X: train_data, Y_: train_target,learning_rate:init_learning_rate})
+    print str(i)+"accuracy: " + str(train_accuracy)
+
+    valid_cross_entropy=sess.run(cross_entropy, {X: valid_data, Y_: valid_target,learning_rate:init_learning_rate})
+    print str(i) + "validation_cross_entropy: " + str(valid_cross_entropy)
+
+    valid_accuracy=sess.run(accuracy, {X: valid_data, Y_: valid_target,learning_rate:init_learning_rate})
+    print str(i) + "validation_accuracy: " + str(valid_accuracy)
 
     init_learning_rate=update_learning_data2(init_learning_rate,i)
     # init_learning_rate=update_learning_data2(init_learning_rate,i)
+    pos = range(1, i + 2)
+    train_cross_entropies.append(float(train_cross_entropy))
+    train_accuracies.append(float(train_accuracy))
+    valid_cross_entropies.append(valid_cross_entropy)
+    valid_accuracies.append(valid_accuracy)
+
+    ax[0].plot(pos, train_cross_entropies)
+    ax[0].set_title("Error Function")
+    ax[0].grid(True)
+
+    ax[1].plot(pos, train_accuracies)
+    ax[1].set_title("Accuracy")
+    ax[1].grid(True)
+
+    ax[2].plot(pos, valid_cross_entropies)
+    ax[2].set_title("Valid cross entropies")
+    ax[2].grid(True)
+
+    ax[3].plot(pos, valid_accuracies)
+    ax[3].set_title("Valid Accuracy")
+    ax[3].grid(True)
+
+    plt.draw()
+
+plt.show()
 
 
 
