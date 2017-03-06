@@ -148,33 +148,6 @@ for i in range(10000):
     print str(i) + "validation_accuracy: " + str(valid_accuracy)
 
     init_learning_rate=update_learning_data2(init_learning_rate,i)
-    # init_learning_rate=update_learning_data2(init_learning_rate,i)
-#     pos = range(1, i + 2)
-#     train_cross_entropies.append(float(train_cross_entropy))
-#     train_accuracies.append(float(train_accuracy))
-#     valid_cross_entropies.append(valid_cross_entropy)
-#     valid_accuracies.append(valid_accuracy)
-#
-#     ax[0].plot(pos, train_cross_entropies)
-#     ax[0].set_title("Error Function")
-#     ax[0].grid(True)
-#
-#     ax[1].plot(pos, train_accuracies)
-#     ax[1].set_title("Accuracy")
-#     ax[1].grid(True)
-#
-#     ax[2].plot(pos, valid_cross_entropies)
-#     ax[2].set_title("Valid cross entropies")
-#     ax[2].grid(True)
-#
-#     ax[3].plot(pos, valid_accuracies)
-#     ax[3].set_title("Valid Accuracy")
-#     ax[3].grid(True)
-#
-#     plt.draw()
-#
-# plt.show()
-
 
 
 

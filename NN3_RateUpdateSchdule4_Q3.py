@@ -112,6 +112,15 @@ def update_learning_data3(learning_rate,i):
     else:
         return learning_rate
 
+temp_validation_accuracy=0
+def update_learning_data4(learning_rate, validation_accuracy):
+    if validation_accuracy > temp_validation_accuracy:
+        return learning_rate * 1.05
+    elif valid_accuracy == temp_validation_accuracy :
+        return learning_rate
+    else:
+        return learning_rate*0.5
+
 # fig, ax = plt.subplots(1, 4)
 # fig.canvas.set_window_title('Result Evaluation')
 # pos = []
@@ -146,7 +155,7 @@ for i in range(10000):
     valid_accuracy=sess.run(accuracy, {X: valid_data, Y_: valid_target,learning_rate:init_learning_rate})
     print str(i) + "validation_accuracy: " + str(valid_accuracy)
 
-    init_learning_rate=update_learning_data1(init_learning_rate,i)
+    init_learning_rate=update_learning_data4(init_learning_rate,valid_accuracy)
 
 
 
