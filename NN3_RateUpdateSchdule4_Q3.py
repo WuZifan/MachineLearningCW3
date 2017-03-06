@@ -112,11 +112,11 @@ def update_learning_data3(learning_rate,i):
     else:
         return learning_rate
 
-temp_validation_accuracy=0
-def update_learning_data4(learning_rate, validation_accuracy):
-    if validation_accuracy > temp_validation_accuracy:
+
+def update_learning_data4(learning_rate, validation_accuracy,temp_valid_accuracy):
+    if validation_accuracy > temp_valid_accuracy:
         return learning_rate * 1.05
-    elif valid_accuracy == temp_validation_accuracy :
+    elif valid_accuracy == temp_valid_accuracy :
         return learning_rate
     else:
         return learning_rate*0.5
@@ -129,6 +129,7 @@ def update_learning_data4(learning_rate, validation_accuracy):
 # valid_cross_entropies=[]
 # valid_accuracies=[]
 # plt.ion()
+temp_validation_accuracy=0
 index_test=0
 init_learning_rate=0.02
 # while True:
@@ -155,7 +156,8 @@ for i in range(10000):
     valid_accuracy=sess.run(accuracy, {X: valid_data, Y_: valid_target,learning_rate:init_learning_rate})
     print str(i) + "validation_accuracy: " + str(valid_accuracy)
 
-    init_learning_rate=update_learning_data4(init_learning_rate,valid_accuracy)
+    init_learning_rate=update_learning_data4(init_learning_rate,valid_accuracy,temp_validation_accuracy)
+    temp_validation_accuracy=valid_accuracy
 
 
 
