@@ -5,7 +5,6 @@
 import tensorflow as tf
 import numpy as np
 import scipy.io as sio
-import tflearn as tl
 # import matplotlib.pyplot as plt
 
 tf.set_random_seed(0)
@@ -68,14 +67,14 @@ Y2d=tf.nn.dropout(Y2,pkeep)
 Ylogits = tf.sigmoid(tf.matmul(Y2d, W5) + B5)
 
 # regularization with L2
-w1_l1=tl.losses.L1(W1,0.00005)
-w2_l1=tl.losses.L1(W2,0.00005)
+w1_l2=tf.nn.l2_loss(W1)
+w2_l2=tf.nn.l2_loss(W2)
 # cross-entropy loss function (= -sum(Y_i * log(Yi)) ), normalised for batches of 100  images
 # TensorFlow provides the softmax_cross_entropy_with_logits function to avoid numerical stability
 # problems with log(0) which is NaN
 cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=Ylogits, labels=Y_)
-beiTa_Daoshu=len(train_data)
-cross_entropy = tf.reduce_mean(cross_entropy+(w1_l1+w2_l1))*100
+beiTa_Daoshu=0.00007
+cross_entropy = tf.reduce_mean(cross_entropy+(w1_l2+w2_l2)*beiTa_Daoshu)*100
 
 # accuracy of the trained model, between 0 (worst) and 1 (best)
 Y = tf.nn.softmax(Ylogits)
@@ -141,7 +140,6 @@ for i in range(1500):
     # index_test+=1
     # [train_d,train_t]=select_data(train_data,train_target,index_test % 5)
     sess.run(train_step, {X: train_data, Y_: train_target,learning_rate:init_learning_rate,pkeep:0.75})
-    # print "l1_re: "+str(sess.run(w1_l1, {X: train_data, Y_: train_target,learning_rate:init_learning_rate})+sess.run(w2_l1, {X: train_data, Y_: train_target,learning_rate:init_learning_rate}))
     # l_rate=sess.run(transfor)
     # For SGD
     # print "cross_entropy: " + str(sess.run(cross_entropy, {X: [train_data[i % len(train_data)]], Y_: [train_target[i % len(train_data)]]}))
@@ -160,7 +158,6 @@ for i in range(1500):
     print str(i) + "validation_accuracy: " + str(valid_accuracy)
 
     init_learning_rate=update_learning_data3(init_learning_rate,i)
-
 
 
 

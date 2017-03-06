@@ -68,8 +68,8 @@ Y2d=tf.nn.dropout(Y2,pkeep)
 Ylogits = tf.sigmoid(tf.matmul(Y2d, W5) + B5)
 
 # regularization with L2
-w1_l1=tl.losses.L1(W1,0.00005)
-w2_l1=tl.losses.L1(W2,0.00005)
+w1_l1=tl.losses.L1(W1,0.00007)
+w2_l1=tl.losses.L1(W2,0.00007)
 # cross-entropy loss function (= -sum(Y_i * log(Yi)) ), normalised for batches of 100  images
 # TensorFlow provides the softmax_cross_entropy_with_logits function to avoid numerical stability
 # problems with log(0) which is NaN
@@ -160,8 +160,3 @@ for i in range(1500):
     print str(i) + "validation_accuracy: " + str(valid_accuracy)
 
     init_learning_rate=update_learning_data3(init_learning_rate,i)
-
-
-
-
-

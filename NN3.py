@@ -1,11 +1,9 @@
 # encoding: UTF-8
 
-# limitations under the License.
-
 import tensorflow as tf
 import numpy as np
 import scipy.io as sio
-# import matplotlib.pyplot as plt
+
 
 tf.set_random_seed(0)
 
@@ -76,8 +74,8 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 learning_rate=tf.placeholder(tf.float32,shape=[])
 # init_rate=0.01
 # learning_rate=0.01
-# train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cross_entropy)
-train_step = tf.train.MomentumOptimizer(learning_rate,0.5 ).minimize(cross_entropy)
+train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cross_entropy)
+# train_step = tf.train.MomentumOptimizer(learning_rate,0.5 ).minimize(cross_entropy)
 
 # init
 init = tf.global_variables_initializer()
