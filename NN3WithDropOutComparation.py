@@ -54,8 +54,13 @@ XX = tf.reshape(X, [-1, 900])
 # Y2 = tf.nn.sigmoid(tf.matmul(Y1, W2) + B2)
 # Y3 = tf.nn.sigmoid(tf.matmul(Y2, W3) + B3)
 # Y4 = tf.nn.sigmoid(tf.matmul(Y3, W4) + B4)
+# pkeep=tf.placeholder(tf.float32)
+
 Y1 = tf.sigmoid(tf.matmul(XX, W1) + B1)
+# Y1d=tf.nn.dropout(Y1,pkeep)
+
 Y2 = tf.sigmoid(tf.matmul(Y1, W2) + B2)
+# Y2d=tf.nn.dropout(Y2,pkeep)
 # Y3 = tf.sigmoid(tf.matmul(Y2, W3) + B3)
 # Ylogits = tf.matmul(Y4, W5) + B5
 # Ylogits = tf.nn.sigmoid(tf.matmul(Y4, W5) + B5)
@@ -103,7 +108,7 @@ def update_learning_data1(learning_rate,i):
         return learning_rate
 
 def update_learning_data2(learning_rate,i):
-    if i >= 2000:
+    if i >= 1000:
         return learning_rate*0.99
     else:
         return learning_rate
@@ -127,7 +132,7 @@ index_test=0
 init_learning_rate=0.02
 # while True:
 print init_learning_rate # 第一次是0.01.第二次是0.05.第三次是0.001,第四次是0.1
-for i in range(2500):
+for i in range(1500):
     # index_test+=1
     # [train_d,train_t]=select_data(train_data,train_target,index_test % 5)
     sess.run(train_step, {X: train_data, Y_: train_target,learning_rate:init_learning_rate})

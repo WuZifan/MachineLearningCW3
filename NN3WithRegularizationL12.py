@@ -5,6 +5,7 @@
 import tensorflow as tf
 import numpy as np
 import scipy.io as sio
+import tflearn as tl
 # import matplotlib.pyplot as plt
 
 tf.set_random_seed(0)
@@ -54,18 +55,27 @@ XX = tf.reshape(X, [-1, 900])
 # Y2 = tf.nn.sigmoid(tf.matmul(Y1, W2) + B2)
 # Y3 = tf.nn.sigmoid(tf.matmul(Y2, W3) + B3)
 # Y4 = tf.nn.sigmoid(tf.matmul(Y3, W4) + B4)
+# pkeep=tf.placeholder(tf.float32)
+
 Y1 = tf.sigmoid(tf.matmul(XX, W1) + B1)
+# Y1d=tf.nn.dropout(Y1,pkeep)
+
 Y2 = tf.sigmoid(tf.matmul(Y1, W2) + B2)
+# Y2d=tf.nn.dropout(Y2,pkeep)
 # Y3 = tf.sigmoid(tf.matmul(Y2, W3) + B3)
 # Ylogits = tf.matmul(Y4, W5) + B5
 # Ylogits = tf.nn.sigmoid(tf.matmul(Y4, W5) + B5)
 Ylogits = tf.sigmoid(tf.matmul(Y2, W5) + B5)
 
+# regularization with L2
+w1_l1=tl.losses.L1(W1,0.00003)
+w2_l1=tl.losses.L1(W2,0.00003)
 # cross-entropy loss function (= -sum(Y_i * log(Yi)) ), normalised for batches of 100  images
 # TensorFlow provides the softmax_cross_entropy_with_logits function to avoid numerical stability
 # problems with log(0) which is NaN
 cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=Ylogits, labels=Y_)
-cross_entropy = tf.reduce_mean(cross_entropy)*100
+beiTa_Daoshu=len(train_data)
+cross_entropy = tf.reduce_mean(cross_entropy+(w1_l1+w2_l1))*100
 
 # accuracy of the trained model, between 0 (worst) and 1 (best)
 Y = tf.nn.softmax(Ylogits)
@@ -76,8 +86,8 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 learning_rate=tf.placeholder(tf.float32,shape=[])
 # init_rate=0.01
 # learning_rate=0.01
-# train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cross_entropy)
-train_step = tf.train.MomentumOptimizer(learning_rate,0.5 ).minimize(cross_entropy)
+train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cross_entropy)
+#train_step = tf.train.MomentumOptimizer(learning_rate,0.5 ).minimize(cross_entropy)
 
 # init
 init = tf.global_variables_initializer()
@@ -103,7 +113,7 @@ def update_learning_data1(learning_rate,i):
         return learning_rate
 
 def update_learning_data2(learning_rate,i):
-    if i >= 2000:
+    if i >= 1000:
         return learning_rate*0.99
     else:
         return learning_rate
@@ -127,11 +137,11 @@ index_test=0
 init_learning_rate=0.02
 # while True:
 print init_learning_rate # 第一次是0.01.第二次是0.05.第三次是0.001,第四次是0.1
-for i in range(2500):
+for i in range(1500):
     # index_test+=1
     # [train_d,train_t]=select_data(train_data,train_target,index_test % 5)
     sess.run(train_step, {X: train_data, Y_: train_target,learning_rate:init_learning_rate})
-    # transfor=tf.to_float(0.01)
+    print "l1_re: "+str(sess.run(w1_l1, {X: train_data, Y_: train_target,learning_rate:init_learning_rate})+sess.run(w2_l1, {X: train_data, Y_: train_target,learning_rate:init_learning_rate}))
     # l_rate=sess.run(transfor)
     # For SGD
     # print "cross_entropy: " + str(sess.run(cross_entropy, {X: [train_data[i % len(train_data)]], Y_: [train_target[i % len(train_data)]]}))

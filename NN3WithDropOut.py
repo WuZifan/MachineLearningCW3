@@ -54,12 +54,17 @@ XX = tf.reshape(X, [-1, 900])
 # Y2 = tf.nn.sigmoid(tf.matmul(Y1, W2) + B2)
 # Y3 = tf.nn.sigmoid(tf.matmul(Y2, W3) + B3)
 # Y4 = tf.nn.sigmoid(tf.matmul(Y3, W4) + B4)
+pkeep=tf.placeholder(tf.float32)
+
 Y1 = tf.sigmoid(tf.matmul(XX, W1) + B1)
-Y2 = tf.sigmoid(tf.matmul(Y1, W2) + B2)
+Y1d=tf.nn.dropout(Y1,pkeep)
+
+Y2 = tf.sigmoid(tf.matmul(Y1d, W2) + B2)
+Y2d=tf.nn.dropout(Y2,pkeep)
 # Y3 = tf.sigmoid(tf.matmul(Y2, W3) + B3)
 # Ylogits = tf.matmul(Y4, W5) + B5
 # Ylogits = tf.nn.sigmoid(tf.matmul(Y4, W5) + B5)
-Ylogits = tf.sigmoid(tf.matmul(Y2, W5) + B5)
+Ylogits = tf.sigmoid(tf.matmul(Y2d, W5) + B5)
 
 # cross-entropy loss function (= -sum(Y_i * log(Yi)) ), normalised for batches of 100  images
 # TensorFlow provides the softmax_cross_entropy_with_logits function to avoid numerical stability
@@ -103,7 +108,7 @@ def update_learning_data1(learning_rate,i):
         return learning_rate
 
 def update_learning_data2(learning_rate,i):
-    if i >= 2000:
+    if i >= 1000:
         return learning_rate*0.99
     else:
         return learning_rate
@@ -127,26 +132,26 @@ index_test=0
 init_learning_rate=0.02
 # while True:
 print init_learning_rate # 第一次是0.01.第二次是0.05.第三次是0.001,第四次是0.1
-for i in range(2500):
+for i in range(1500):
     # index_test+=1
     # [train_d,train_t]=select_data(train_data,train_target,index_test % 5)
-    sess.run(train_step, {X: train_data, Y_: train_target,learning_rate:init_learning_rate})
+    sess.run(train_step, {X: train_data, Y_: train_target,learning_rate:init_learning_rate,pkeep:0.75})
     # transfor=tf.to_float(0.01)
     # l_rate=sess.run(transfor)
     # For SGD
     # print "cross_entropy: " + str(sess.run(cross_entropy, {X: [train_data[i % len(train_data)]], Y_: [train_target[i % len(train_data)]]}))
     # print "cross_entropy: "+str(sess.run(cross_entropy, {X: [train_data[i % len(train_data)]], Y_: [train_target[i % len(train_data)]]}))
     # print "accuracy: "+str(sess.run(accuracy, {X: [train_data[i % len(train_data)]], Y_: [train_target[i % len(train_data)]]}))
-    train_cross_entropy=sess.run(cross_entropy, {X: train_data, Y_: train_target,learning_rate:init_learning_rate})
+    train_cross_entropy=sess.run(cross_entropy, {X: train_data, Y_: train_target,learning_rate:init_learning_rate,pkeep:0.75})
     print str(i)+"cross_entropy: " + str(train_cross_entropy)
 
-    train_accuracy=sess.run(accuracy, {X: train_data, Y_: train_target,learning_rate:init_learning_rate})
+    train_accuracy=sess.run(accuracy, {X: train_data, Y_: train_target,learning_rate:init_learning_rate,pkeep:0.75})
     print str(i)+"accuracy: " + str(train_accuracy)
 
-    valid_cross_entropy=sess.run(cross_entropy, {X: valid_data, Y_: valid_target,learning_rate:init_learning_rate})
+    valid_cross_entropy=sess.run(cross_entropy, {X: valid_data, Y_: valid_target,learning_rate:init_learning_rate,pkeep:0.75})
     print str(i) + "validation_cross_entropy: " + str(valid_cross_entropy)
 
-    valid_accuracy=sess.run(accuracy, {X: valid_data, Y_: valid_target,learning_rate:init_learning_rate})
+    valid_accuracy=sess.run(accuracy, {X: valid_data, Y_: valid_target,learning_rate:init_learning_rate,pkeep:0.75})
     print str(i) + "validation_accuracy: " + str(valid_accuracy)
 
     init_learning_rate=update_learning_data2(init_learning_rate,i)
