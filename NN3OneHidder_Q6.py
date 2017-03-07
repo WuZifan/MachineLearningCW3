@@ -24,6 +24,27 @@ train_target= target_data[0][0]
 test_target= target_data[0][1]
 valid_target= target_data[0][2]
 
+def normalization(nor_data):
+    for i in range(len(nor_data[0])):
+        mean=np.mean(nor_data[:,i])
+        std =np.std(nor_data[:,i])
+        for j in range(len(nor_data)):
+            nor_data[j,i]=(nor_data[j,i]-mean)/std
+    return nor_data
+
+print np.mean(train_data[:,0])
+
+print np.var(train_data[:,0])
+
+train_data=normalization(train_data)
+valid_data=normalization(valid_data)
+test_data=normalization(test_data)
+
+
+print np.mean(train_data[:,0])
+
+print np.var(train_data[:,0])
+
 # input X: 28x28 grayscale images, the first dimension (None) will index the images in the mini-batch
 X = tf.placeholder(tf.float32, [None, 900])
 
@@ -43,9 +64,9 @@ N = 120
 O = 60
 # Weights initialised with small random values between -0.2 and +0.2
 # When using RELUs, make sure biases are initialised with small *positive* values for example 0.1 = tf.ones([K])/10
-W1 = tf.Variable(tf.truncated_normal([900, L], stddev=0.2))  # 784 = 28 * 28
+W1 = tf.Variable(tf.truncated_normal([900, L], stddev=1))  # 784 = 28 * 28
 B1 = tf.Variable(tf.zeros([L])+0.1)
-W2 = tf.Variable(tf.truncated_normal([L, M], stddev=0.2))
+W2 = tf.Variable(tf.truncated_normal([L, M], stddev=1))
 B2 = tf.Variable(tf.zeros([M])+0.1)
 # W3 = tf.Variable(tf.truncated_normal([M, N], stddev=0.2))
 # B3 = tf.Variable(tf.zeros([N])+0.1)
@@ -64,29 +85,19 @@ XX = tf.reshape(X, [-1, 900])
 pkeep=tf.placeholder(tf.float32)
 
 Y1_B=tf.matmul(XX, W1) + B1
-
-y1_m,y1_v=tf.nn.moments(Y1_B,axes=[0])
-scale1=tf.Variable(tf.ones([L]))
-shift1=tf.Variable(tf.zeros([L]))
-epsilon=0.001
-Y1_B=tf.nn.batch_normalization(Y1_B,y1_m,y1_v,shift1,scale1,epsilon)
-
-Y1 = tf.sigmoid(Y1_B)
+# Y1 = tf.sigmoid(Y1_B)
+Y1 = tf.nn.relu(Y1_B)
 Y1d=tf.nn.dropout(Y1,pkeep)
 
 Y2_B=tf.matmul(Y1d, W2) + B2
-y2_m,y2_v=tf.nn.moments(Y2_B,axes=[0])
-scale2=tf.Variable(tf.ones([M]))
-shift2=tf.Variable(tf.zeros([M]))
-epsilon=0.001
-Y2_B=tf.nn.batch_normalization(Y2_B,y2_m,y2_v,shift2,scale2,epsilon)
-
-Y2 = tf.sigmoid(Y2_B)
+Y2 = tf.nn.relu(Y2_B)
 Y2d=tf.nn.dropout(Y2,pkeep)
+
 # Y3 = tf.sigmoid(tf.matmul(Y2, W3) + B3)
 # Ylogits = tf.matmul(Y4, W5) + B5
 # Ylogits = tf.nn.sigmoid(tf.matmul(Y4, W5) + B5)
-Ylogits = tf.sigmoid(tf.matmul(Y2d, W5) + B5)
+# Ylogits = tf.sigmoid(tf.matmul(Y2d, W5) + B5)
+Ylogits = tf.nn.softmax(tf.matmul(Y2d, W5) + B5)
 
 # regularization with L2
 w1_l2=tf.nn.l2_loss(W1)
@@ -99,7 +110,8 @@ beiTa_Daoshu=0.00001
 cross_entropy = tf.reduce_mean(cross_entropy+(w1_l2+w2_l2)*beiTa_Daoshu)*100
 
 # accuracy of the trained model, between 0 (worst) and 1 (best)
-Y = tf.nn.softmax(Ylogits)
+# Y = tf.nn.softmax(Ylogits)
+Y = Ylogits
 correct_prediction = tf.equal(tf.argmax(Y, 1), tf.argmax(Y_, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
@@ -107,7 +119,8 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 learning_rate=tf.placeholder(tf.float32,shape=[])
 # init_rate=0.01
 # learning_rate=0.01
-train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cross_entropy)
+# train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cross_entropy)
+train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy)
 # train_step = tf.train.MomentumOptimizer(learning_rate,0.95 ).minimize(cross_entropy)
 
 # init
@@ -119,7 +132,7 @@ def select_data(train_data,train_target,i):
     o_data=[]
     o_target=[]
     for ind in range(len(train_data)):
-        if ind % 1 ==i:
+        if ind % 3 ==i:
             o_data.append(train_data[ind])
             o_target.append(train_target[ind])
 
@@ -155,7 +168,7 @@ def update_learning_data4(learning_rate, validation_accuracy, temp_valid_accurac
 
 temp_validation_accuracy=0
 index_test=0
-init_learning_rate=0.02
+init_learning_rate=0.0001
 # while True:
 print init_learning_rate # 第一次是0.01.第二次是0.05.第三次是0.001,第四次是0.1
 print len(train_data)
@@ -163,7 +176,9 @@ for i in range(500*len(train_data)):
 
 
     # # index_test+=1
-    [train_d,train_t]=select_data(train_data,train_target,i % 1)
+    # [train_d,train_t]=select_data(train_data,train_target,i % 3)
+    train_d=train_data
+    train_t=train_target
     print "lenth of data:"+str(len(train_d))+" "+str(len(train_t))
     sess.run(train_step, {X: train_d, Y_: train_t,learning_rate:init_learning_rate,pkeep:0.75})
     # # l_rate=sess.run(transfor)

@@ -121,7 +121,7 @@ def update_learning_data3(learning_rate,i):
 # valid_accuracies=[]
 # plt.ion()
 index_test=0
-init_learning_rate=0.02
+init_learning_rate=0.000
 # while True:
 print init_learning_rate # 第一次是0.01.第二次是0.05.第三次是0.001,第四次是0.1
 for i in range(10000):
