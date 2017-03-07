@@ -32,16 +32,7 @@ def normalization(nor_data):
             nor_data[j,i]=(nor_data[j,i]-mean)/std
     return nor_data
 
-print np.mean(train_data[:,0])
-
-print np.var(train_data[:,0])
-
 train_data=normalization(train_data)
-
-print np.mean(train_data[:,0])
-
-print np.var(train_data[:,0])
-
 valid_data=normalization(valid_data)
 test_data=normalization(test_data)
 
@@ -103,7 +94,8 @@ learning_rate=tf.placeholder(tf.float32,shape=[])
 # init_rate=0.01
 # learning_rate=0.01
 # train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cross_entropy)
-train_step = tf.train.MomentumOptimizer(learning_rate,0.95 ).minimize(cross_entropy)
+# train_step = tf.train.MomentumOptimizer(learning_rate,0.95 ).minimize(cross_entropy)
+train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy)
 
 # init
 init = tf.global_variables_initializer()
@@ -122,23 +114,33 @@ def select_data(train_data,train_target,i):
     o_target=np.array(o_target)
     return o_data,o_target
 
-def update_learning_data1(learning_rate,i):
-    if i % 2000 ==0:
+def update_learning_data1(learning_rate,i,epochs):
+    if i % (epochs/5) ==0:
         return learning_rate/2
     else:
         return learning_rate
 
-def update_learning_data2(learning_rate,i):
-    if i >= 400:
+def update_learning_data2(learning_rate,i,epochs):
+    if i >= 0.8*epochs:
         return learning_rate*0.99
     else:
         return learning_rate
 
-def update_learning_data3(learning_rate,i):
-    if i >= 8000:
-        return learning_rate*8000/i
+def update_learning_data3(learning_rate,i,epochs):
+    if i >= 0.8*epochs:
+        return learning_rate*(0.8*epochs)/i
     else:
         return learning_rate
+
+
+def update_learning_data4(learning_rate, validation_accuracy,temp_valid_accuracy):
+    if validation_accuracy > temp_valid_accuracy:
+        return learning_rate * 1.05
+    elif valid_accuracy == temp_valid_accuracy :
+        return learning_rate
+    else:
+        return learning_rate*0.8
+
 
 
 # fig, ax = plt.subplots(1, 4)
@@ -150,10 +152,11 @@ def update_learning_data3(learning_rate,i):
 # valid_accuracies=[]
 # plt.ion()
 index_test=0
-init_learning_rate=0.002
+init_learning_rate=0.0002
 # while True:
 print init_learning_rate # 第一次是0.01.第二次是0.05.第三次是0.001,第四次是0.1
-for i in range(500):
+Epochs=500
+for i in range(Epochs):
     # index_test+=1
     # [train_d,train_t]=select_data(train_data,train_target,index_test % 5)
     sess.run(train_step, {X: train_data, Y_: train_target,learning_rate:init_learning_rate,pkeep:0.75})
@@ -175,34 +178,4 @@ for i in range(500):
     valid_accuracy=sess.run(accuracy, {X: valid_data, Y_: valid_target,learning_rate:init_learning_rate,pkeep:0.75})
     print str(i) + "validation_accuracy: " + str(valid_accuracy)
 
-    init_learning_rate=update_learning_data2(init_learning_rate,i)
-    # init_learning_rate=update_learning_data2(init_learning_rate,i)
-#     pos = range(1, i + 2)
-#     train_cross_entropies.append(float(train_cross_entropy))
-#     train_accuracies.append(float(train_accuracy))
-#     valid_cross_entropies.append(valid_cross_entropy)
-#     valid_accuracies.append(valid_accuracy)
-#
-#     ax[0].plot(pos, train_cross_entropies)
-#     ax[0].set_title("Error Function")
-#     ax[0].grid(True)
-#
-#     ax[1].plot(pos, train_accuracies)
-#     ax[1].set_title("Accuracy")
-#     ax[1].grid(True)
-#
-#     ax[2].plot(pos, valid_cross_entropies)
-#     ax[2].set_title("Valid cross entropies")
-#     ax[2].grid(True)
-#
-#     ax[3].plot(pos, valid_accuracies)
-#     ax[3].set_title("Valid Accuracy")
-#     ax[3].grid(True)
-#
-#     plt.draw()
-#
-# plt.show()
-
-
-
-
+    init_learning_rate=update_learning_data2(init_learning_rate,i,Epochs)

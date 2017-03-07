@@ -22,6 +22,19 @@ train_target= target_data[0][0]
 test_target= target_data[0][1]
 valid_target= target_data[0][2]
 
+def normalization(nor_data):
+    for i in range(len(nor_data[0])):
+        mean=np.mean(nor_data[:,i])
+        std =np.std(nor_data[:,i])
+        for j in range(len(nor_data)):
+            nor_data[j,i]=(nor_data[j,i]-mean)/std
+    return nor_data
+
+train_data=normalization(train_data)
+valid_data=normalization(valid_data)
+test_data=normalization(test_data)
+
+
 # input X: 28x28 grayscale images, the first dimension (None) will index the images in the mini-batch
 X = tf.placeholder(tf.float32, [None, 900])
 # correct answers will go here
@@ -74,7 +87,8 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 learning_rate=tf.placeholder(tf.float32,shape=[])
 # init_rate=0.01
 # learning_rate=0.01
-train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cross_entropy)
+train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy)
+# train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cross_entropy)
 # train_step = tf.train.MomentumOptimizer(learning_rate,0.5 ).minimize(cross_entropy)
 
 # init
@@ -94,21 +108,21 @@ def select_data(train_data,train_target,i):
     o_target=np.array(o_target)
     return o_data,o_target
 
-def update_learning_data1(learning_rate,i):
-    if i % 2000 ==0:
+def update_learning_data1(learning_rate,i,epochs):
+    if i % (epochs/5) ==0:
         return learning_rate/2
     else:
         return learning_rate
 
-def update_learning_data2(learning_rate,i):
-    if i >= 8000:
+def update_learning_data2(learning_rate,i,epochs):
+    if i >= 0.8*epochs:
         return learning_rate*0.99
     else:
         return learning_rate
 
-def update_learning_data3(learning_rate,i):
-    if i >= 8000:
-        return learning_rate*8000/i
+def update_learning_data3(learning_rate,i,epochs):
+    if i >= 0.8*epochs:
+        return learning_rate*(0.8*epochs)/i
     else:
         return learning_rate
 
@@ -121,10 +135,11 @@ def update_learning_data3(learning_rate,i):
 # valid_accuracies=[]
 # plt.ion()
 index_test=0
-init_learning_rate=0.000
+init_learning_rate=0.0002
 # while True:
 print init_learning_rate # 第一次是0.01.第二次是0.05.第三次是0.001,第四次是0.1
-for i in range(10000):
+Epochs=500
+for i in range(Epochs):
     # index_test+=1
     # [train_d,train_t]=select_data(train_data,train_target,index_test % 5)
     sess.run(train_step, {X: train_data, Y_: train_target,learning_rate:init_learning_rate})
@@ -146,7 +161,7 @@ for i in range(10000):
     valid_accuracy=sess.run(accuracy, {X: valid_data, Y_: valid_target,learning_rate:init_learning_rate})
     print str(i) + "validation_accuracy: " + str(valid_accuracy)
 
-    init_learning_rate=update_learning_data1(init_learning_rate,i)
+    init_learning_rate=update_learning_data1(init_learning_rate,i,Epochs)
 
 
 
