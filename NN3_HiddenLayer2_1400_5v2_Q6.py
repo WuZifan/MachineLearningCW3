@@ -1,11 +1,9 @@
 # encoding: UTF-8
 
-# limitations under the License.
-
 import tensorflow as tf
 import numpy as np
 import scipy.io as sio
-# import matplotlib.pyplot as plt
+
 
 tf.set_random_seed(0)
 
@@ -32,41 +30,26 @@ def normalization(nor_data):
             nor_data[j,i]=(nor_data[j,i]-mean)/std
     return nor_data
 
-print np.mean(train_data[:,0])
-
-print np.var(train_data[:,0])
-
 train_data=normalization(train_data)
 valid_data=normalization(valid_data)
 test_data=normalization(test_data)
 
-
-print np.mean(train_data[:,0])
-
-print np.var(train_data[:,0])
-
 # input X: 28x28 grayscale images, the first dimension (None) will index the images in the mini-batch
 X = tf.placeholder(tf.float32, [None, 900])
 
-#
-# X_mean,X_var=tf.nn.moments(X,axes=[0,1])
-# scale_X=tf.Variable(tf.ones([len(train_data),900]))
-# shift_X=tf.Variable(tf.zeros([len(train_data),900]))
-# epsilon=0.001
-# X=tf.nn.batch_normalization(X,X_mean,X_var,shift_X,scale_X,epsilon)
-# correct answers will go here
 Y_ = tf.placeholder(tf.float32, [None, 7])
 
 # five layers and their number of neurons (tha last layer has 10 softmax neurons)
 L = 1000
-M = 500
-N = 120
+M = 400
+N = 200
 O = 60
+
 # Weights initialised with small random values between -0.2 and +0.2
 # When using RELUs, make sure biases are initialised with small *positive* values for example 0.1 = tf.ones([K])/10
-W1 = tf.Variable(tf.truncated_normal([900, L], stddev=1))  # 784 = 28 * 28
+W1 = tf.Variable(tf.truncated_normal([900, L], stddev=0.2))  # 784 = 28 * 28
 B1 = tf.Variable(tf.zeros([L])+0.1)
-W2 = tf.Variable(tf.truncated_normal([L, M], stddev=1))
+W2 = tf.Variable(tf.truncated_normal([L, M], stddev=0.2))
 B2 = tf.Variable(tf.zeros([M])+0.1)
 # W3 = tf.Variable(tf.truncated_normal([M, N], stddev=0.2))
 # B3 = tf.Variable(tf.zeros([N])+0.1)
@@ -84,24 +67,18 @@ XX = tf.reshape(X, [-1, 900])
 # Y4 = tf.nn.sigmoid(tf.matmul(Y3, W4) + B4)
 pkeep=tf.placeholder(tf.float32)
 
-Y1_B=tf.matmul(XX, W1) + B1
-# Y1 = tf.sigmoid(Y1_B)
-Y1 = tf.nn.relu(Y1_B)
+Y1 = tf.sigmoid(tf.matmul(XX, W1) + B1)
 Y1d=tf.nn.dropout(Y1,pkeep)
 
-Y2_B=tf.matmul(Y1d, W2) + B2
-Y2 = tf.nn.relu(Y2_B)
+Y2 = tf.sigmoid(tf.matmul(Y1d, W2) + B2)
 Y2d=tf.nn.dropout(Y2,pkeep)
 
-# Y3 = tf.sigmoid(tf.matmul(Y2, W3) + B3)
-# Ylogits = tf.matmul(Y4, W5) + B5
-# Ylogits = tf.nn.sigmoid(tf.matmul(Y4, W5) + B5)
-# Ylogits = tf.sigmoid(tf.matmul(Y2d, W5) + B5)
 Ylogits = tf.nn.softmax(tf.matmul(Y2d, W5) + B5)
 
 # regularization with L2
 w1_l2=tf.nn.l2_loss(W1)
 w2_l2=tf.nn.l2_loss(W2)
+
 # cross-entropy loss function (= -sum(Y_i * log(Yi)) ), normalised for batches of 100  images
 # TensorFlow provides the softmax_cross_entropy_with_logits function to avoid numerical stability
 # problems with log(0) which is NaN
@@ -117,11 +94,8 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 # training step, learning rate = 0.003;
 learning_rate=tf.placeholder(tf.float32,shape=[])
-# init_rate=0.01
-# learning_rate=0.01
-# train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cross_entropy)
+
 train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy)
-# train_step = tf.train.MomentumOptimizer(learning_rate,0.95 ).minimize(cross_entropy)
 
 # init
 init = tf.global_variables_initializer()
@@ -140,21 +114,21 @@ def select_data(train_data,train_target,i):
     o_target=np.array(o_target)
     return o_data,o_target
 
-def update_learning_data1(learning_rate,i):
-    if i % 500 ==0:
+def update_learning_data1(learning_rate,i,epochs):
+    if i % (epochs/5) ==0:
         return learning_rate/2
     else:
         return learning_rate
 
-def update_learning_data2(learning_rate,i):
-    if i >= 1000:
+def update_learning_data2(learning_rate,i,epochs):
+    if i >= 0.8*epochs:
         return learning_rate*0.99
     else:
         return learning_rate
 
-def update_learning_data3(learning_rate,i):
-    if i >= 1000:
-        return learning_rate*1000/i
+def update_learning_data3(learning_rate,i,epochs):
+    if i >= 0.8*epochs:
+        return learning_rate*(0.8*epochs)/i
     else:
         return learning_rate
 
@@ -168,24 +142,17 @@ def update_learning_data4(learning_rate, validation_accuracy, temp_valid_accurac
 
 temp_validation_accuracy=0
 index_test=0
-init_learning_rate=0.0001
+init_learning_rate=0.0002
 # while True:
 print init_learning_rate # 第一次是0.01.第二次是0.05.第三次是0.001,第四次是0.1
 print len(train_data)
-for i in range(500*len(train_data)):
+Epochs=800
+for i in range(Epochs):
 
-
-    # # index_test+=1
-    # [train_d,train_t]=select_data(train_data,train_target,i % 3)
     train_d=train_data
     train_t=train_target
-    print "lenth of data:"+str(len(train_d))+" "+str(len(train_t))
     sess.run(train_step, {X: train_d, Y_: train_t,learning_rate:init_learning_rate,pkeep:0.75})
-    # # l_rate=sess.run(transfor)
-    # # For SGD
-    # # print "cross_entropy: " + str(sess.run(cross_entropy, {X: [train_data[i % len(train_data)]], Y_: [train_target[i % len(train_data)]]}))
-    # # print "cross_entropy: "+str(sess.run(cross_entropy, {X: [train_data[i % len(train_data)]], Y_: [train_target[i % len(train_data)]]}))
-    # # print "accuracy: "+str(sess.run(accuracy, {X: [train_data[i % len(train_data)]], Y_: [train_target[i % len(train_data)]]}))
+
     train_cross_entropy=sess.run(cross_entropy, {X: train_d, Y_: train_t,learning_rate:init_learning_rate,pkeep:0.75})
     print str(i)+"cross_entropy: " + str(train_cross_entropy)
 
@@ -198,8 +165,7 @@ for i in range(500*len(train_data)):
     valid_accuracy=sess.run(accuracy, {X: valid_data, Y_: valid_target,learning_rate:init_learning_rate,pkeep:0.75})
     print str(i) + "validation_accuracy: " + str(valid_accuracy)
 
-    # init_learning_rate=update_learning_data4(init_learning_rate,valid_accuracy,temp_validation_accuracy)
-    # temp_validation_accuracy=valid_accuracy
+    init_learning_rate = update_learning_data2(init_learning_rate, i, Epochs)
 
 
 
